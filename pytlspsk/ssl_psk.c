@@ -113,9 +113,15 @@ init_ssl_psk(void)
 {
     PyObject* m = Py_InitModule("_ssl_psk", Methods);
     if (m == NULL)
-        return;
+        return NULL;
 
     Error = PyErr_NewException("_ssl_psk.error", NULL, NULL);
     Py_INCREF(Error);
-    PyModule_AddObject(m, "error", Error);
+    if (PyModule_AddObject(m, "error", Error) < 0) {
+      Py_XDECREF(Error);
+      Py_CLEAR(Error);
+      Py_DECREF(m);
+      return NULL;
+    }
+    return m;
 }
